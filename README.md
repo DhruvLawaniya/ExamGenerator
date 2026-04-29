@@ -1,4 +1,7 @@
 # ExamGenerator
+
+Visit the website at : https://dhruvlawaniya.github.io/ExamGenerator/
+
 One stop solution to generate Exam style Question Paper
 
 I created this website specifically for my time at the University of Sydney. 
