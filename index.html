@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ExamPortal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --ink-soft: #3d3d5c;
+    --ink-muted: #7b7b9a;
+    --paper: #f7f5f0;
+    --paper-warm: #ede9e0;
+    --paper-card: #ffffff;
+    --rule: #ddd9ce;
+    --accent: #c0392b;
+    --accent-light: #f9eae8;
+    --green: #1a7a4a;
+    --green-light: #e6f5ee;
+    --red: #c0392b;
+    --red-light: #fcecea;
+    --gold: #d4900a;
+    --gold-light: #fef6e0;
+    --blue: #1a5fa8;
+    --blue-light: #e8f0fc;
+    --purple: #6b3d9c;
+    --purple-light: #f0eaf8;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    --shadow-lg: 0 12px 32px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.05);
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--ink);
+    color: white;
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.25);
+  }
+  .header-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .brand-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+    letter-spacing: -0.5px;
+    color: white;
+  }
+  .brand-tag {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+  }
+  #timer-display {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.08);
+    padding: 6px 16px;
+    border-radius: 40px;
+    border: 1px solid rgba(255,255,255,0.12);
+    min-width: 80px;
+    text-align: center;
+    transition: color 0.3s;
+  }
+  #timer-display.warn { color: #ff8c5a; border-color: rgba(255,100,50,0.3); }
+
+  /* ── EXAM META ── */
+  .exam-meta {
+    max-width: 900px;
+    margin: 36px auto 0;
+    padding: 0 24px;
+  }
+  .exam-title-block {
+    background: var(--paper-card);
+    border-radius: var(--radius);
+    padding: 32px 36px;
+    box-shadow: var(--shadow-md);
+    border-top: 4px solid var(--ink);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .exam-label {
+    font-size: 0.7rem;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .exam-heading {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.1rem;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+  .exam-stats {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+  .stat-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--ink-soft);
+  }
+  .stat-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--ink-muted);
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-wrap {
+    max-width: 900px;
+    margin: 18px auto 0;
+    padding: 0 24px;
+  }
+  .progress-bar-bg {
+    height: 4px;
+    background: var(--rule);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--ink), var(--ink-soft));
+    border-radius: 99px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--ink-muted);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  /* ── SECTION ── */
+  .section-wrap {
+    max-width: 900px;
+    margin: 32px auto 0;
+    padding: 0 24px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .section-icon {
+    width: 36px; height: 36px;
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .section-icon.mcq    { background: var(--blue-light); }
+  .section-icon.fib    { background: var(--gold-light); }
+  .section-icon.short  { background: var(--green-light); }
+  .section-icon.long   { background: var(--purple-light); }
+
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.25rem;
+    color: var(--ink);
+  }
+  .section-badge {
+    margin-left: auto;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 99px;
+    letter-spacing: 0.5px;
+  }
+  .section-badge.mcq   { background: var(--blue-light); color: var(--blue); }
+  .section-badge.fib   { background: var(--gold-light); color: var(--gold); }
+  .section-badge.short { background: var(--green-light); color: var(--green); }
+  .section-badge.long  { background: var(--purple-light); color: var(--purple); }
+
+  /* ── QUESTION CARD ── */
+  .q-card {
+    background: var(--paper-card);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 14px;
+    border: 1px solid var(--rule);
+    transition: box-shadow 0.2s, border-color 0.2s;
+    position: relative;
+  }
+  .q-card:hover { box-shadow: var(--shadow-md); }
+  .q-card.answered { border-left: 3px solid var(--ink); }
+
+  .q-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--ink-muted);
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .q-text {
+    font-size: 1rem;
+    color: var(--ink);
+    font-weight: 500;
+    margin-bottom: 18px;
+    line-height: 1.6;
+  }
+  .q-multi-hint {
+    font-size: 0.72rem;
+    color: var(--blue);
+    font-weight: 600;
+    background: var(--blue-light);
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    margin-top: -8px;
+  }
+
+  /* ── MCQ OPTIONS ── */
+  .options-grid {
+    display: grid;
+    gap: 8px;
+  }
+  .option-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--rule);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    user-select: none;
+  }
+  .option-label:hover { background: var(--paper); border-color: var(--ink-muted); }
+  .option-label input[type="radio"],
+  .option-label input[type="checkbox"] { display: none; }
+
+  .option-box {
+    width: 20px; height: 20px;
+    border-radius: 4px;
+    border: 2px solid var(--rule);
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: transparent;
+    transition: all 0.15s;
+    background: white;
+  }
+  .option-label.radio-style .option-box { border-radius: 50%; }
+
+  .option-label.selected { background: var(--ink); border-color: var(--ink); }
+  .option-label.selected .option-box {
+    background: white;
+    border-color: white;
+    color: var(--ink);
+  }
+  .option-label.selected .option-text { color: white; font-weight: 500; }
+
+  .option-text { font-size: 0.92rem; color: var(--ink-soft); line-height: 1.5; }
+
+  /* post-submit states */
+  .option-label.correct-answer {
+    background: var(--green-light) !important;
+    border-color: var(--green) !important;
+  }
+  .option-label.correct-answer .option-box { background: var(--green); border-color: var(--green); color: white; }
+  .option-label.correct-answer .option-text { color: var(--green); font-weight: 600; }
+
+  .option-label.wrong-choice {
+    background: var(--red-light) !important;
+    border-color: var(--red) !important;
+  }
+  .option-label.wrong-choice .option-box { background: var(--red); border-color: var(--red); color: white; }
+  .option-label.wrong-choice .option-text { color: var(--red); }
+
+  /* ── FIB ── */
+  .fib-input {
+    width: 100%;
+    border: none;
+    border-bottom: 2px solid var(--rule);
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--ink);
+    padding: 6px 4px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .fib-input:focus { border-bottom-color: var(--ink); }
+  .fib-input::placeholder { color: var(--ink-muted); }
+
+  .fib-input.correct { border-bottom-color: var(--green); background: var(--green-light); color: var(--green); border-radius: 4px 4px 0 0; padding: 6px 8px; font-weight: 600; }
+  .fib-input.incorrect { border-bottom-color: var(--red); background: var(--red-light); color: var(--red); border-radius: 4px 4px 0 0; padding: 6px 8px; }
+
+  /* ── SHORT / LONG ANSWER ── */
+  .answer-textarea {
+    width: 100%;
+    border: 1.5px solid var(--rule);
+    border-radius: var(--radius-sm);
+    background: var(--paper);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.92rem;
+    color: var(--ink);
+    padding: 12px 14px;
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    line-height: 1.6;
+  }
+  .answer-textarea:focus { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(26,26,46,0.06); }
+  .answer-textarea[readonly] { opacity: 0.6; background: var(--paper-warm); cursor: not-allowed; }
+
+  /* ── FEEDBACK PANEL ── */
+  .feedback-panel {
+    display: none;
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 0.87rem;
+    line-height: 1.6;
+  }
+  .feedback-panel.show { display: block; }
+  .feedback-panel.correct  { background: var(--green-light);  border-left: 3px solid var(--green);  color: var(--green); }
+  .feedback-panel.incorrect { background: var(--red-light); border-left: 3px solid var(--red); color: var(--red); }
+  .feedback-panel.reveal   { background: var(--gold-light);  border-left: 3px solid var(--gold);  color: #8a6200; }
+  .feedback-panel.info     { background: var(--blue-light);  border-left: 3px solid var(--blue);  color: var(--blue); }
+  .fb-label { font-weight: 700; margin-bottom: 3px; font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; }
+  .fb-answer { font-weight: 500; }
+
+  /* ── RESULT BADGE on card ── */
+  .result-badge {
+    position: absolute;
+    top: 16px; right: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 99px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .result-badge.correct  { background: var(--green-light); color: var(--green); }
+  .result-badge.incorrect { background: var(--red-light); color: var(--red); }
+  .result-badge.partial   { background: var(--gold-light); color: var(--gold); }
+  .result-badge.shown     { background: var(--blue-light); color: var(--blue); }
+
+  /* ── SUBMIT AREA ── */
+  .submit-area {
+    max-width: 900px;
+    margin: 32px auto 60px;
+    padding: 0 24px;
+  }
+  .submit-bar {
+    background: var(--paper-card);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .submit-info { font-size: 0.88rem; color: var(--ink-soft); }
+  .submit-info strong { color: var(--ink); }
+  #submit-btn {
+    background: var(--ink);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 13px 32px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    letter-spacing: 0.3px;
+  }
+  #submit-btn:hover { background: #2d2d4a; transform: translateY(-1px); }
+  #submit-btn:active { transform: translateY(0); }
+  #submit-btn:disabled { background: var(--ink-muted); cursor: not-allowed; transform: none; }
+
+  /* ── RESULTS BANNER ── */
+  #results-banner {
+    display: none;
+    max-width: 900px;
+    margin: 0 auto 24px;
+    padding: 0 24px;
+  }
+  #results-banner.show { display: block; }
+  .results-card {
+    background: var(--ink);
+    color: white;
+    border-radius: var(--radius);
+    padding: 28px 32px;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+  .results-score-circle {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    border: 3px solid rgba(255,255,255,0.25);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .score-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.6rem;
+    line-height: 1;
+  }
+  .score-denom { font-size: 0.7rem; opacity: 0.6; }
+  .results-text h2 { font-family: 'DM Serif Display', serif; font-size: 1.5rem; margin-bottom: 4px; }
+  .results-text p { font-size: 0.85rem; opacity: 0.7; }
+  .results-breakdown {
+    margin-left: auto;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .rb-item { text-align: center; }
+  .rb-num { font-family: 'DM Serif Display', serif; font-size: 1.5rem; }
+  .rb-label { font-size: 0.68rem; opacity: 0.55; text-transform: uppercase; letter-spacing: 1px; }
+
+  /* ── DIVIDER ── */
+  .section-divider { border: none; border-top: 2px dashed var(--rule); margin: 36px 0 0; }
+
+  /* ── JSON LOADER ── */
+  .json-loader-bar {
+    max-width: 900px;
+    margin: 20px auto 0;
+    padding: 0 24px;
+  }
+  .json-loader-inner {
+    background: var(--paper-warm);
+    border: 1.5px dashed var(--rule);
+    border-radius: var(--radius);
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .json-loader-inner label { font-size: 0.82rem; font-weight: 600; color: var(--ink-soft); white-space: nowrap; }
+  #json-file-input { font-size: 0.82rem; color: var(--ink-soft); }
+  #load-json-btn {
+    background: var(--ink); color: white;
+    border: none; border-radius: var(--radius-sm);
+    padding: 8px 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem; font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  #load-json-btn:hover { background: #2d2d4a; }
+  .json-note { font-size: 0.75rem; color: var(--ink-muted); margin-left: auto; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .exam-heading { font-size: 1.5rem; }
+    .results-breakdown { margin-left: 0; }
+    .submit-bar { flex-direction: column; align-items: stretch; }
+    #submit-btn { text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <span class="brand-name">ExamPortal</span>
+      <span class="brand-tag">Assessment</span>
+    </div>
+    <div id="timer-display">00:00</div>
+  </div>
+</header>
+
+<!-- JSON loader bar -->
+<div class="json-loader-bar">
+  <div class="json-loader-inner">
+    <label>📂 Load custom JSON:</label>
+    <input type="file" id="json-file-input" accept=".json">
+    <button id="load-json-btn">Load Exam</button>
+    <span class="json-note">Leave blank to use the built-in sample exam</span>
+  </div>
+</div>
+
+<!-- Exam meta -->
+<div class="exam-meta" id="exam-meta">
+  <div class="exam-title-block">
+    <div class="exam-label">Assessment Paper</div>
+    <div class="exam-heading" id="exam-heading">Loading exam...</div>
+    <div class="exam-stats" id="exam-stats"></div>
+  </div>
+</div>
+
+<!-- Progress bar -->
+<div class="progress-wrap">
+  <div class="progress-label">
+    <span>Progress</span>
+    <span id="progress-text">0 / 0 answered</span>
+  </div>
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill"></div></div>
+</div>
+
+<!-- Results banner -->
+<div id="results-banner">
+  <div class="results-card">
+    <div class="results-score-circle">
+      <div class="score-num" id="score-num">—</div>
+      <div class="score-denom" id="score-denom">/ 0</div>
+    </div>
+    <div class="results-text">
+      <h2 id="results-headline">Exam Submitted</h2>
+      <p id="results-sub">Scroll down to review your answers.</p>
+    </div>
+    <div class="results-breakdown" id="results-breakdown"></div>
+  </div>
+</div>
+
+<!-- Question sections will be injected here -->
+<div id="exam-body"></div>
+
+<!-- Submit -->
+<div class="submit-area">
+  <div class="submit-bar">
+    <div class="submit-info" id="submit-info">Answer all questions before submitting.</div>
+    <button id="submit-btn">Submit Exam</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// SAMPLE EXAM JSON
+// ═══════════════════════════════════════════════════════
+const SAMPLE_EXAM = {
+  title: "General Knowledge & Science",
+  subject: "Interdisciplinary",
+  duration_minutes: 30,
+  questions: [
+    // MCQ – single correct
+    {
+      type: "MCQ",
+      question: "Which planet is known as the Red Planet?",
+      answer: "Mars",
+      incorrect_options: ["Venus", "Jupiter", "Saturn"]
+    },
+    {
+      type: "MCQ",
+      question: "What is the chemical symbol for Gold?",
+      answer: "Au",
+      incorrect_options: ["Ag", "Go", "Gd"]
+    },
+    // MCQ – multiple correct
+    {
+      type: "MCQ",
+      question: "Which of the following are programming languages? (Select all that apply)",
+      answer: ["Python", "Rust"],
+      incorrect_options: ["HTML", "Photoshop"]
+    },
+    {
+      type: "MCQ",
+      question: "Which are primary colours in the RGB colour model? (Select all that apply)",
+      answer: ["Red", "Blue", "Green"],
+      incorrect_options: ["Yellow", "Cyan"]
+    },
+    // Fill in the blanks
+    {
+      type: "FIB",
+      question: "The powerhouse of the cell is the ___________.",
+      answer: "mitochondria"
+    },
+    {
+      type: "FIB",
+      question: "The speed of light in a vacuum is approximately ___________ km/s.",
+      answer: "300000"
+    },
+    {
+      type: "FIB",
+      question: "Water is composed of hydrogen and ___________ atoms.",
+      answer: "oxygen"
+    },
+    // Short answer
+    {
+      type: "SHORT",
+      question: "What is Newton's Second Law of Motion? State it in one sentence.",
+      answer: "Newton's Second Law states that the net force on an object equals the product of its mass and acceleration (F = ma)."
+    },
+    {
+      type: "SHORT",
+      question: "Briefly explain what DNA stands for and its primary function.",
+      answer: "DNA stands for Deoxyribonucleic Acid. Its primary function is to store genetic information and direct protein synthesis in living organisms."
+    },
+    // Long answer
+    {
+      type: "LONG",
+      question: "Explain the process of photosynthesis, including the reactants, products, and where each stage takes place in the chloroplast.",
+      answer: "Photosynthesis is the process by which plants, algae, and some bacteria convert light energy into chemical energy stored in glucose. It occurs in two stages:\n\n1. Light-dependent reactions (in the thylakoid membranes): Water molecules are split using light energy, releasing oxygen as a byproduct. ATP and NADPH are produced.\n\n2. Light-independent reactions / Calvin Cycle (in the stroma): CO₂ is fixed using the ATP and NADPH produced above to form glucose (C₆H₁₂O₆).\n\nOverall equation: 6CO₂ + 6H₂O + light energy → C₆H₁₂O₆ + 6O₂"
+    },
+    {
+      type: "LONG",
+      question: "Describe the causes and consequences of the Industrial Revolution, and its long-term impact on modern society.",
+      answer: "The Industrial Revolution (c. 1760–1840) transformed manufacturing through mechanisation, steam power, and factory systems.\n\nCauses: Agricultural improvements freed labour, capital from trade funded factories, abundant coal and iron in Britain, and legal/financial institutions supported enterprise.\n\nConsequences: Rapid urbanisation, rise of a working class, increased productivity, environmental pollution, and child labour exploitation.\n\nLong-term impacts: Mass production, global trade networks, modern capitalism, labour rights movements, and the fossil fuel dependency that underlies today's climate challenges."
+    }
+  ]
+};
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let examData = null;
+let submitted = false;
+let timerInterval = null;
+let elapsed = 0;
+
+// ═══════════════════════════════════════════════════════
+// TIMER
+// ═══════════════════════════════════════════════════════
+function startTimer() {
+  const el = document.getElementById('timer-display');
+  timerInterval = setInterval(() => {
+    if (submitted) return;
+    elapsed++;
+    const m = Math.floor(elapsed / 60).toString().padStart(2,'0');
+    const s = (elapsed % 60).toString().padStart(2,'0');
+    el.textContent = `${m}:${s}`;
+  }, 1000);
+}
+
+// ═══════════════════════════════════════════════════════
+// SHUFFLE
+// ═══════════════════════════════════════════════════════
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════
+function renderExam(data) {
+  examData = data;
+  submitted = false;
+
+  // Meta
+  document.getElementById('exam-heading').textContent = data.title || 'Untitled Exam';
+  const totalQ = data.questions.length;
+  const mcqCount   = data.questions.filter(q=>q.type==='MCQ').length;
+  const fibCount   = data.questions.filter(q=>q.type==='FIB').length;
+  const shortCount = data.questions.filter(q=>q.type==='SHORT').length;
+  const longCount  = data.questions.filter(q=>q.type==='LONG').length;
+
+  const stats = document.getElementById('exam-stats');
+  const pills = [
+    { label: `${totalQ} Questions`, color: '' },
+    mcqCount  ? { label: `${mcqCount} MCQ`,          color: '#1a5fa8' } : null,
+    fibCount  ? { label: `${fibCount} Fill-in`,       color: '#d4900a' } : null,
+    shortCount? { label: `${shortCount} Short Answer`,color: '#1a7a4a' } : null,
+    longCount ? { label: `${longCount} Long Answer`,  color: '#6b3d9c' } : null,
+    data.duration_minutes ? { label: `${data.duration_minutes} min`, color: '' } : null,
+  ].filter(Boolean);
+
+  stats.innerHTML = pills.map(p =>
+    `<div class="stat-pill"><div class="stat-dot" style="${p.color?'background:'+p.color:''}"></div>${p.label}</div>`
+  ).join('');
+
+  // Group questions
+  const groups = [
+    { type:'MCQ',   label:'Multiple Choice Questions', icon:'⬛', cls:'mcq',   badge:'MCQ' },
+    { type:'FIB',   label:'Fill in the Blanks',        icon:'✏️',  cls:'fib',   badge:'Fill-in' },
+    { type:'SHORT', label:'Short Answer Questions',    icon:'📝',  cls:'short', badge:'Short' },
+    { type:'LONG',  label:'Long Answer Questions',     icon:'📄',  cls:'long',  badge:'Long' },
+  ];
+
+  let html = '';
+  let globalIdx = 0;
+
+  groups.forEach(g => {
+    const qs = data.questions.filter(q=>q.type===g.type);
+    if (!qs.length) return;
+
+    html += `<div class="section-wrap">
+      <hr class="section-divider">
+      <div class="section-header" style="margin-top:20px">
+        <div class="section-icon ${g.cls}">${g.icon}</div>
+        <div class="section-title">${g.label}</div>
+        <div class="section-badge ${g.cls}">${qs.length} ${g.badge}</div>
+      </div>`;
+
+    qs.forEach((q, i) => {
+      globalIdx++;
+      const qid = `q${globalIdx}`;
+      const isMulti = Array.isArray(q.answer);
+
+      if (g.type === 'MCQ') {
+        const allOpts = shuffle([
+          ...(Array.isArray(q.answer) ? q.answer : [q.answer]),
+          ...(q.incorrect_options || [])
+        ]);
+        const inputType = isMulti ? 'checkbox' : 'radio';
+        const optClass  = isMulti ? '' : 'radio-style';
+
+        html += `<div class="q-card" id="card-${qid}" data-qid="${qid}" data-type="MCQ" data-multi="${isMulti}">
+          <div class="q-num">Question ${globalIdx}</div>
+          <div class="q-text">${q.question}</div>
+          ${isMulti ? '<div class="q-multi-hint">Select all that apply</div>' : ''}
+          <div class="options-grid">`;
+
+        allOpts.forEach((opt, oi) => {
+          html += `<label class="option-label ${optClass}" id="opt-${qid}-${oi}" data-opt="${oi}">
+            <input type="${inputType}" name="${qid}" value="${esc(opt)}" data-qid="${qid}">
+            <div class="option-box">${inputType==='checkbox'?'✓':'●'}</div>
+            <span class="option-text">${esc(opt)}</span>
+          </label>`;
+        });
+
+        html += `</div>
+          <div class="feedback-panel" id="fb-${qid}"></div>
+        </div>`;
+
+      } else if (g.type === 'FIB') {
+        html += `<div class="q-card" id="card-${qid}" data-qid="${qid}" data-type="FIB">
+          <div class="q-num">Question ${globalIdx}</div>
+          <div class="q-text">${q.question.replace(/___+/, '<span style="border-bottom:2px solid var(--rule);min-width:80px;display:inline-block">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>')}</div>
+          <input class="fib-input" id="inp-${qid}" placeholder="Type your answer here…" autocomplete="off">
+          <div class="feedback-panel" id="fb-${qid}"></div>
+        </div>`;
+
+      } else if (g.type === 'SHORT') {
+        html += `<div class="q-card" id="card-${qid}" data-qid="${qid}" data-type="SHORT">
+          <div class="q-num">Question ${globalIdx}</div>
+          <div class="q-text">${q.question}</div>
+          <textarea class="answer-textarea" id="inp-${qid}" rows="3" placeholder="Write your answer here…" maxlength="1000"></textarea>
+          <div class="feedback-panel" id="fb-${qid}"></div>
+        </div>`;
+
+      } else if (g.type === 'LONG') {
+        html += `<div class="q-card" id="card-${qid}" data-qid="${qid}" data-type="LONG">
+          <div class="q-num">Question ${globalIdx}</div>
+          <div class="q-text">${q.question}</div>
+          <textarea class="answer-textarea" id="inp-${qid}" rows="8" placeholder="Write your detailed answer here…"></textarea>
+          <div class="feedback-panel" id="fb-${qid}"></div>
+        </div>`;
+      }
+
+      // store answer on the card element (will be set after render)
+      html = html.replace(`data-qid="${qid}"`, `data-qid="${qid}" data-answer="${esc(Array.isArray(q.answer)?JSON.stringify(q.answer):q.answer)}"`);
+    });
+
+    html += `</div>`; // .section-wrap
+  });
+
+  document.getElementById('exam-body').innerHTML = html;
+  document.getElementById('progress-text').textContent = `0 / ${totalQ} answered`;
+  document.getElementById('progress-fill').style.width = '0%';
+  document.getElementById('submit-btn').disabled = false;
+  document.getElementById('results-banner').classList.remove('show');
+
+  attachListeners(totalQ);
+  if (!timerInterval) { elapsed = 0; startTimer(); }
+}
+
+function esc(str) {
+  if (typeof str !== 'string') return str;
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ═══════════════════════════════════════════════════════
+// LISTENERS
+// ═══════════════════════════════════════════════════════
+function attachListeners(totalQ) {
+  let answered = 0;
+
+  function recalcProgress() {
+    let count = 0;
+    document.querySelectorAll('.q-card').forEach(card => {
+      const type = card.dataset.type;
+      if (type === 'MCQ') {
+        const checked = card.querySelectorAll('input:checked');
+        if (checked.length > 0) count++;
+      } else {
+        const inp = card.querySelector('input, textarea');
+        if (inp && inp.value.trim()) count++;
+      }
+    });
+    const pct = Math.round((count / totalQ) * 100);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-text').textContent = `${count} / ${totalQ} answered`;
+    document.getElementById('submit-info').innerHTML = count === totalQ
+      ? `<strong>All questions answered.</strong> Ready to submit!`
+      : `<strong>${count} of ${totalQ}</strong> questions answered.`;
+  }
+
+  // MCQ option toggle
+  document.querySelectorAll('.option-label').forEach(label => {
+    label.addEventListener('click', () => {
+      if (submitted) return;
+      const inp = label.querySelector('input');
+      const qid = inp.dataset.qid;
+      const isCheckbox = inp.type === 'checkbox';
+
+      if (isCheckbox) {
+        inp.checked = !inp.checked;
+        label.classList.toggle('selected', inp.checked);
+      } else {
+        // radio
+        document.querySelectorAll(`input[name="${qid}"]`).forEach(r => {
+          r.checked = false;
+          r.closest('.option-label').classList.remove('selected');
+        });
+        inp.checked = true;
+        label.classList.add('selected');
+      }
+
+      const card = document.getElementById(`card-${qid}`);
+      card.classList.toggle('answered', !!document.querySelector(`input[name="${qid}"]:checked`));
+      recalcProgress();
+    });
+  });
+
+  // text inputs
+  document.querySelectorAll('.fib-input, .answer-textarea').forEach(el => {
+    el.addEventListener('input', () => {
+      if (submitted) return;
+      const qid = el.id.replace('inp-','');
+      const card = document.getElementById(`card-${qid}`);
+      card.classList.toggle('answered', !!el.value.trim());
+      recalcProgress();
+    });
+  });
+
+  // Submit
+  document.getElementById('submit-btn').addEventListener('click', submitExam);
+}
+
+// ═══════════════════════════════════════════════════════
+// SUBMIT
+// ═══════════════════════════════════════════════════════
+function submitExam() {
+  if (submitted) return;
+  submitted = true;
+  document.getElementById('submit-btn').disabled = true;
+  clearInterval(timerInterval);
+
+  let totalGradable = 0, correct = 0, incorrect = 0, revealed = 0;
+
+  document.querySelectorAll('.q-card').forEach(card => {
+    const qid  = card.dataset.qid;
+    const type = card.dataset.type;
+    const rawAnswer = card.dataset.answer;
+    const fb = document.getElementById(`fb-${qid}`);
+
+    if (type === 'MCQ') {
+      totalGradable++;
+      const isMulti = card.dataset.multi === 'true';
+      let correctAnswers;
+      try { correctAnswers = JSON.parse(rawAnswer); } catch(e) { correctAnswers = [rawAnswer]; }
+      if (!Array.isArray(correctAnswers)) correctAnswers = [correctAnswers];
+      const correctSet = new Set(correctAnswers.map(a=>a.toLowerCase().trim()));
+
+      const selectedInputs = card.querySelectorAll('input:checked');
+      const selectedValues = Array.from(selectedInputs).map(i=>i.value.toLowerCase().trim());
+      const selectedSet = new Set(selectedValues);
+
+      // Mark each option
+      card.querySelectorAll('.option-label').forEach(lbl => {
+        const inp = lbl.querySelector('input');
+        const val = inp.value.toLowerCase().trim();
+        const isCorrectOpt = correctSet.has(val);
+        const isSelected   = selectedSet.has(val);
+
+        if (isCorrectOpt) {
+          lbl.classList.add('correct-answer');
+          lbl.querySelector('.option-box').textContent = '✓';
+        } else if (isSelected && !isCorrectOpt) {
+          lbl.classList.add('wrong-choice');
+          lbl.querySelector('.option-box').textContent = '✗';
+        }
+        lbl.classList.remove('selected');
+        inp.disabled = true;
+      });
+
+      // Score MCQ
+      const isCorrect = isMulti
+        ? (selectedSet.size === correctSet.size && [...correctSet].every(c=>selectedSet.has(c)))
+        : (selectedSet.size === 1 && [...selectedSet][0] === [...correctSet][0]);
+
+      const isPartial = isMulti && !isCorrect && [...correctSet].some(c=>selectedSet.has(c));
+
+      if (isCorrect) {
+        correct++;
+        addBadge(card, 'correct', '✓ Correct');
+        showFeedback(fb, 'correct', 'Correct!', '');
+      } else if (isPartial) {
+        incorrect++;
+        addBadge(card, 'partial', '◑ Partial');
+        showFeedback(fb, 'incorrect', 'Partially correct.',
+          `Correct answers: ${correctAnswers.join(', ')}`);
+      } else {
+        incorrect++;
+        addBadge(card, 'incorrect', '✗ Incorrect');
+        showFeedback(fb, 'incorrect', 'Incorrect.',
+          `Correct answer${correctAnswers.length>1?'s':''}: ${correctAnswers.join(', ')}`);
+      }
+
+    } else if (type === 'FIB') {
+      totalGradable++;
+      const inp = document.getElementById(`inp-${qid}`);
+      const userVal = inp.value.trim().toLowerCase();
+      const correctVal = rawAnswer.trim().toLowerCase();
+      inp.readOnly = true;
+
+      if (userVal === correctVal) {
+        correct++;
+        inp.classList.add('correct');
+        addBadge(card, 'correct', '✓ Correct');
+        showFeedback(fb, 'correct', 'Correct!', '');
+      } else {
+        incorrect++;
+        inp.classList.add('incorrect');
+        addBadge(card, 'incorrect', '✗ Incorrect');
+        showFeedback(fb, 'incorrect', 'Incorrect.', `Correct answer: ${rawAnswer}`);
+      }
+
+    } else if (type === 'SHORT' || type === 'LONG') {
+      revealed++;
+      const inp = document.getElementById(`inp-${qid}`);
+      if (inp) inp.readOnly = true;
+      addBadge(card, 'shown', 'Answer shown');
+      showFeedback(fb, 'reveal', 'Model Answer', rawAnswer.replace(/\n/g,'<br>'));
+    }
+  });
+
+  // Results banner
+  const banner = document.getElementById('results-banner');
+  banner.classList.add('show');
+  document.getElementById('score-num').textContent = correct;
+  document.getElementById('score-denom').textContent = `/ ${totalGradable}`;
+  const pct = totalGradable ? Math.round((correct/totalGradable)*100) : 0;
+  document.getElementById('results-headline').textContent = pct>=80?'Excellent work!':(pct>=60?'Good effort!':'Keep practicing!');
+  document.getElementById('results-sub').textContent = `You scored ${correct} out of ${totalGradable} auto-graded questions (${pct}%). Scroll to review each answer.`;
+  document.getElementById('results-breakdown').innerHTML = `
+    <div class="rb-item"><div class="rb-num">${correct}</div><div class="rb-label">Correct</div></div>
+    <div class="rb-item"><div class="rb-num">${incorrect}</div><div class="rb-label">Incorrect</div></div>
+    ${revealed?`<div class="rb-item"><div class="rb-num">${revealed}</div><div class="rb-label">To Review</div></div>`:''}
+  `;
+  banner.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function addBadge(card, cls, text) {
+  const b = document.createElement('div');
+  b.className = `result-badge ${cls}`;
+  b.textContent = text;
+  card.appendChild(b);
+}
+
+function showFeedback(el, cls, label, answer) {
+  el.className = `feedback-panel ${cls} show`;
+  el.innerHTML = `<div class="fb-label">${label}</div>${answer?`<div class="fb-answer">${answer}</div>`:''}`;
+}
+
+// ═══════════════════════════════════════════════════════
+// JSON FILE LOADER
+// ═══════════════════════════════════════════════════════
+document.getElementById('load-json-btn').addEventListener('click', () => {
+  const fileInput = document.getElementById('json-file-input');
+  if (!fileInput.files.length) { alert('Please select a JSON file first.'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.questions || !Array.isArray(data.questions)) throw new Error('Missing "questions" array');
+      document.getElementById('exam-body').innerHTML = '';
+      clearInterval(timerInterval);
+      timerInterval = null;
+      renderExam(data);
+    } catch(err) {
+      alert('Invalid JSON: ' + err.message);
+    }
+  };
+  reader.readAsText(fileInput.files[0]);
+});
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+renderExam(SAMPLE_EXAM);
+</script>
+</body>
+</html>
