@@ -1,8 +1,9 @@
 # ExamGenerator
 One stop solution to generate Exam style Question Paper
 
-I created this website specifically for my time at the University of Sydney, to use this:
-Step 1 : Go to any AI CHatbot
+I created this website specifically for my time at the University of Sydney. 
+To use this website:
+Step 1 : Go to any AI Chatbot
 Step 2 : Upload all lecture contents and ask the AI Bot to generate a JSON file for exam style questions(sampple JSON structure provided below). Once this is done, upload this json to the website and it is good to go
 ```
 Sample JSON structure:
